@@ -1,6 +1,6 @@
 {
   "name": "reqly",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Express helper to quickly run a server with Babelify, LESS and SASS",
   "main": "index.js",
   "scripts": {
