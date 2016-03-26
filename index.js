@@ -18,7 +18,7 @@ exports.connect = function(directory, port) {
 
     // Load middleware
     var mwLess = less(directory);
-    var mwSass = sass({ src: directory });
+    var mwSass = sass({ src: directory, response: true });
     var mwBrowserify = browserify(directory, browserifyOptions);
     var mwExpress = express.static(directory);
 
