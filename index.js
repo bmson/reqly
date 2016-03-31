@@ -1,39 +1,53 @@
 // Global dependencies
-var express = require('express');
-var less = require('express-less');
-var sass = require('node-sass-middleware');
-var browserify = require('browserify-middleware');
-var babelify = require('babelify');
+const express = require('express');
+const webRTC  = require('express-ws');
+
+// Middleware
+const less       = require('express-less');
+const sass       = require('node-sass-middleware');
+const browserify = require('browserify-middleware');
+const babelify   = require('babelify');
 
 // Initiate Express
-var app = express();
+const app = express();
+
+// Attach webRTC to express app
+webRTC(app);
 
 // Module definition
-exports.connect = function(directory, port) {
+exports.connect = (directory, port) => {
 
-    // Browserify options
-    var browserifyOptions = {
-        'transform': [ babelify.configure({ presets: ['es2015'] }) ]
-    };
+  // Browserify options
+  const browserifyOptions = {
+    'transform': [
+      babelify.configure({ 'presets': 'es2015' })
+    ]
+  };
 
-    // Load middleware
-    var mwLess = less(directory);
-    var mwSass = sass({ src: directory, response: true });
-    var mwBrowserify = browserify(directory, browserifyOptions);
-    var mwExpress = express.static(directory);
+  // Load middleware
+  const middleware = [
+    less(directory),
+    sass({ 'src': directory, 'response': true }),
+    browserify(directory, browserifyOptions),
+    express.static(directory)
+  ];
 
-    // Add middleware
-    app.use(mwLess, mwSass, mwBrowserify, mwExpress);
+  // Add middleware
+  app.use(...middleware);
 
-    // Listen to port
-    port = process.env.PORT || port;
-
-    app.listen(port, function() {
-        process.stdout.write('Listening on port ' + port);
-    });
+  // Listen to port
+  app.listen(port, () => {
+    process.stdout.write('Listening on port ' + port);
+  });
 
 };
 
-// Handle HTTP requests
-exports.get = app.get.bind(app);
+// Export requests
+exports.get  = app.get.bind(app);
 exports.post = app.post.bind(app);
+exports.ws   = app.ws.bind(app);
+
+// Export helper
+exports.bridge = (mirror, path) => {
+  this.get(mirror, (req, res) => { res.sendFile(path); });
+};
